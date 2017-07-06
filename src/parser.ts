@@ -184,11 +184,11 @@ const parsePaths = (
   rootDir:string,
   paths:string[],
   baseUrl:string|undefined,
-  otherFiles:File[]
+  otherFiles:File[],
+  excludes: string[]
 ):File[] => {
   const files = otherFiles.concat(
     paths
-    .filter(p => p.indexOf('.d.') == -1)
     .map(path => parseFile(rootDir, resolve(rootDir, path), baseUrl))
   );
 
@@ -197,13 +197,13 @@ const parsePaths = (
 
   const missingImports = ([] as string[])
     .concat(...files.map(f => Object.keys(f.imports)))
-    .filter(i => !found[i])
+    .filter(i => !found[i] && !excludes.some(exclude => i.indexOf(exclude, i.length - exclude.length) >= 0))
     .map(i => `${i}.ts`);
 
   return missingImports.length
-    ? parsePaths(rootDir, missingImports, baseUrl, files)
+    ? parsePaths(rootDir, missingImports, baseUrl, files, excludes)
     : files;
 };
 
-export default (rootDir:string, paths:string[], baseUrl?:string):File[] =>
-  parsePaths(rootDir, paths, baseUrl, []);
+export default (rootDir:string, paths:string[], baseUrl?:string, excludes?: string[]):File[] =>
+  parsePaths(rootDir, paths, baseUrl, [], excludes || []);

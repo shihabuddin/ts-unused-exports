@@ -1,7 +1,8 @@
 import analyzeTsConfig from './app';
 import { existsSync, statSync } from 'fs';
+import { argv } from 'yargs';
 
-const [tsconfig, ...tsFiles] = process.argv.slice(2);
+const [tsconfig, ...tsFiles] = argv._;
 
 if (!tsconfig || !existsSync(tsconfig) || !statSync(tsconfig).isFile()) {
   console.error(`
@@ -25,11 +26,15 @@ if (!tsconfig || !existsSync(tsconfig) || !statSync(tsconfig).isFile()) {
 }
 
 try {
+  const excludes = (argv.excludes as string || 'd.ts')
+      .split('|')
+      .map(exclude => exclude[0] === '.' ? exclude : '.' + exclude);
   const analysis = analyzeTsConfig(
     tsconfig,
     tsFiles.length
       ? tsFiles
-      : undefined
+      : undefined,
+      excludes
   );
 
   const files = Object.keys(analysis);

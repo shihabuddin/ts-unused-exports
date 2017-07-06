@@ -40,13 +40,14 @@ const loadTsConfig = (
   return { baseUrl, files} ;
 };
 
-export default (tsconfigPath:string, files?:string[]) => {
+export default (tsconfigPath:string, files?:string[], excludes?: string[]) => {
   const tsConfig = loadTsConfig(tsconfigPath, files);
   return analyze(
     parseFiles(
       dirname(tsconfigPath),
       tsConfig.files,
-      tsConfig.baseUrl
+      tsConfig.baseUrl,
+      excludes
     )
   );
 };
